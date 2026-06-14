@@ -1,0 +1,31 @@
+{
+  "name": "defensa-express",
+  "version": "0.1.0",
+  "description": "Motor de búsqueda legal local para Perú - Privacy-First, FOSS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "ejemplo": "ts-node ejemplos/uso-basico.ts",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "legal",
+    "peru",
+    "derechos",
+    "privacy-first",
+    "offline",
+    "foss"
+  ],
+  "author": "Defensa Express",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "dependencies": {}
+}

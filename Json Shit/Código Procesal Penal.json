@@ -1,0 +1,62 @@
+[
+  {
+    "scenario": "Control de identidad en la calle",
+    "accion_legal": "Artículo 205, numerales 1 y 2",
+    "guion_de_defensa": "Oficial, según el artículo 205, le solicito que me informe su identidad y la dependencia a la que pertenece. Asimismo, le informo que estoy ejerciendo mi derecho a que esta intervención sea registrada en audio o video.",
+    "limite_policial": "El policía no puede obligarte a ir a la comisaría si tienes tu DNI contigo. Si lo tienes, debe realizar la verificación en el lugar y dejarte ir inmediatamente[cite: 1]."
+  },
+  {
+    "scenario": "Registro de vestimentas o vehículo",
+    "accion_legal": "Artículo 205, numeral 3 y Artículo 210, numerales 1 y 4",
+    "guion_de_defensa": "Oficial, usted no tiene fundado motivo para registrar mis pertenencias. Si insiste, le exijo que me explique las razones legales y solicito estar asistido por una persona de mi confianza que sea mayor de edad antes de proceder.",
+    "limite_policial": "El policía no puede registrar tus pertenencias por simple capricho; debe haber un 'fundado motivo' vinculado a un delito[cite: 1]. Además, debe invitarte primero a que exhibas voluntariamente lo que busca[cite: 1]."
+  },
+  {
+    "scenario": "Policía quiere revisar mi celular",
+    "accion_legal": "Artículo 230-A (solo en flagrancia de extorsión, sicariato o secuestro) y Artículo 230",
+    "guion_de_defensa": "Señor policía, mi equipo informático es privado y mi comunicación está protegida. Solo permitiré la revisión si cuenta con autorización del Ministerio Público en el marco de una investigación confirmada por un Juez, conforme al código procesal.",
+    "limite_policial": "La policía no puede revisar el contenido de tu celular en una intervención de rutina. Solo pueden hacerlo en casos específicos de delitos graves (extorsión, sicariato, secuestro) y requieren obligatoriamente autorización del Ministerio Público[cite: 1]."
+  },
+  {
+    "scenario": "Policía quiere entrar a mi casa (Allanamiento)",
+    "accion_legal": "Artículo 214, numeral 1 y Artículo 216, numeral 1",
+    "guion_de_defensa": "Oficial, este es mi domicilio. Si no tiene una orden judicial escrita que me permita leer en este momento, no puede ingresar. Le solicito me entregue copia de la autorización y me permita llamar a un abogado defensor.",
+    "limite_policial": "No pueden ingresar a tu casa sin orden judicial, salvo que exista flagrante delito o peligro inminente de perpetración. Si ingresan, deben entregarte copia de la resolución autoritativa y permitir la presencia de un abogado[cite: 1]."
+  },
+  {
+    "scenario": "Detención y negativa a llamar a un abogado",
+    "accion_legal": "Artículo 71, numeral 2, incisos c) y d) y Artículo 84, numeral 1",
+    "guion_de_defensa": "Oficial, el artículo 71 me garantiza el derecho a ser asistido por un abogado desde este momento. Exijo que se me permita contactar a mi abogado defensor y que se deje constancia en acta de que estoy solicitando su presencia antes de cualquier declaración.",
+    "limite_policial": "La policía no puede impedirte el acceso a tu abogado. Cualquier declaración que intentes hacer sin su presencia o sin haber sido instruido de tus derechos carece de validez legal[cite: 2]."
+  },
+  {
+    "scenario": "Policía quiere obligarme a pasar prueba de alcoholemia",
+    "accion_legal": "Artículo 213",
+    "guion_de_defensa": "Acepto realizar la prueba de aire aspirado, pero le recuerdo que el acta de la diligencia debe ser levantada correctamente y tengo derecho a que se me informe sobre el procedimiento de los resultados.",
+    "limite_policial": "El policía no puede realizar la prueba de intoxicación en sangre por su cuenta; solo puede hacer la de aire aspirado. Si esta es positiva, debe conducirte a un centro sanitario para la prueba de sangre, no hacerla ellos mismos[cite: 1]."
+  },
+  {
+    "scenario": "Retención de personas durante una pesquisa policial",
+    "accion_legal": "Artículo 209, numeral 1",
+    "guion_de_defensa": "Oficial, el artículo 209 establece que la retención solo es para fines de la diligencia. ¿Cuánto tiempo planea retenerme? Le recuerdo que mi derecho a la libre circulación no puede ser limitado más allá de lo estrictamente necesario para la pesquisa.",
+    "limite_policial": "La policía no puede retenerte indefinidamente. La retención para una pesquisa tiene un límite legal de cuatro horas, pudiendo ampliarse por otras cuatro en casos de criminalidad organizada o delitos graves, tras lo cual requieren orden judicial[cite: 2]."
+  },
+  {
+    "scenario": "Policía intenta registrar personas de sexo distinto",
+    "accion_legal": "Artículo 210, numeral 2",
+    "guion_de_defensa": "Oficial, le solicito que el registro sea efectuado por una persona de mi mismo sexo, tal como lo exige el artículo 210 para respetar mi pudor y dignidad.",
+    "limite_policial": "El registro debe efectuarse respetando la dignidad y el pudor; el policía no puede realizarlo si es de sexo opuesto, a menos que una demora extrema perjudique la investigación, pero es una regla que deben seguir bajo responsabilidad[cite: 2]."
+  },
+  {
+    "scenario": "Policía exige la entrega de un documento privado sin orden",
+    "accion_legal": "Artículo 232",
+    "guion_de_defensa": "Señor policía, eso es un documento privado. Según el artículo 232, usted no puede examinarlo sin una orden de incautación. Si desea, puede asegurarlo para ponerlo a disposición de un juez, pero le prohíbo que lea o examine su contenido ahora.",
+    "limite_policial": "La policía no puede examinar el contenido de documentos privados encontrados durante un registro si no cuenta con una orden de incautación previa. Solo pueden asegurarlos (guardarlos bajo sobre sellado) para entregarlos a un juez en menos de 24 horas[cite: 2]."
+  },
+  {
+    "scenario": "Policía quiere ingresar a un local comercial o negocio",
+    "accion_legal": "Artículo 237, numeral 1",
+    "guion_de_defensa": "Oficial, para clausurar o vigilar este local se requiere una orden judicial específica según el artículo 237. ¿Cuenta usted con esa resolución? De lo contrario, no puede impedir mi libre actividad comercial.",
+    "limite_policial": "La clausura o vigilancia de locales solo procede por orden del Juez a pedido del Fiscal, para delitos graves (pena mayor a 4 años), y debe estar formalizada en una resolución que detalle el tiempo y la finalidad[cite: 2]."
+  }
+]

@@ -1,0 +1,66 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# ==========================================
+# REGLAS ADICIONALES ANTIFILTRACIÓN (DATO PERSONAL / SEGURIDAD)
+# ==========================================
+
+# Bloquea rutas locales de tu PC hacia el SDK de Android (Suele contener tu nombre de usuario de Windows/Mac)
+**/android/local.properties
+
+# Bloquea las llaves de firmado digital (.keystore o .jks) que contienen tus datos de desarrollador
+*.keystore
+*.jks
+**/android/app/*.keystore
+**/android/app/*.jks
+
+# Bloquea archivos de configuración de Firebase u otros servicios si los usas (Contienen IDs de proyecto)
+**/android/app/google-services.json
+**/ios/Runner/GoogleService-Info.plist
+
+# Bloquea archivos de variables de entorno donde se guardan contraseñas o API keys en texto plano
+.env
+*.env

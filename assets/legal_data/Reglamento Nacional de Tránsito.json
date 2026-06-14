@@ -1,0 +1,66 @@
+{
+  "reglamento_metadata": {
+    "nombre": "Reglamento Nacional de Tránsito de Perú",
+    "base_legal": "D.S. N° 016-2009-MTC y modificatorias",
+    "ultima_actualizacion_referenciada": "2014"
+  },
+  "glosario": [
+    {
+      "termino": "Accidente",
+      "definicion": "Evento que cause daño a personas o cosas, que se produce como consecuencia directa de la circulación de vehículos."
+    },
+    {
+      "termino": "Acera",
+      "definicion": "Parte de la vía, destinada al uso de peatones (Vereda)."
+    },
+    {
+      "termino": "Adelantar",
+      "definicion": "Maniobra mediante la cual un vehículo se sitúa delante de otro que lo antecede, utilizando el carril de la izquierda a su posición, salvo excepciones."
+    },
+    {
+      "termino": "Alcoholemia",
+      "definicion": "Examen o prueba para detectar presencia de alcohol en la sangre de una persona. (Dosaje etílico)."
+    },
+    {
+      "termino": "Vía",
+      "definicion": "Carretera, vía urbana o camino rural abierto a la circulación pública de vehículos y/o peatones, y también de animales."
+    },
+    {
+      "termino": "Vía Pública",
+      "definicion": "Vía de uso público, sobre la cual la Autoridad competente impone restricciones y otorga concesiones, permisos y autorizaciones."
+    },
+    {
+      "termino": "Vía urbana",
+      "definicion": "Vía dentro del ámbito urbano, destinada a la circulación de vehículos y peatones y eventualmente de animales (Calle)."
+    }
+  ],
+  "infracciones": [
+    {
+      "codigo": "G.31",
+      "descripcion": "No tener encendidas las luces bajas de un vehículo motorizado en carreteras de la red vial nacional y departamental o regional, las veinticuatro (24) horas del día.",
+      "gravedad": "Grave",
+      "sancion_monto": "8% UIT",
+      "puntos": 20,
+      "medida_preventiva": "Ninguna"
+    },
+    {
+      "codigo": "G.70",
+      "descripcion": "Ingresar a una intersección si el flujo vehicular se encuentra detenido de tal forma que obstruya la circulación, quedando el vehículo detenido en dicha intersección, o no respetar la señalización 'NO BLOQUEAR CRUCE'.",
+      "gravedad": "Grave",
+      "sancion_monto": "8% UIT",
+      "puntos": 20,
+      "medida_preventiva": "Ninguna"
+    }
+  ],
+  "limites_velocidad": {
+    "descripcion": "Límites máximos permitidos establecidos en el Título IV, Capítulo IV",
+    "zona_escolar": {
+      "limite_maximo": "30 km/h",
+      "rango_extension": "Se extiende cincuenta (50) metros a los lados de los lugares de acceso al local"
+    },
+    "zona_hospital": {
+      "limite_maximo": "30 km/h",
+      "rango_extension": "Se extiende cincuenta (50) metros a los lados de los lugares de acceso al local"
+    }
+  }
+}

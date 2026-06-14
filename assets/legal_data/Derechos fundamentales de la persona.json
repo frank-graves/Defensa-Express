@@ -1,0 +1,112 @@
+[
+  {
+    "id": "inviolabilidad_domicilio",
+    "title": "Intento de Ingreso al Domicilio sin Orden Judicial",
+    "intents": [
+      "el tombo se quiere meter a mi jato",
+      "policia quiere entrar a mi casa a la fuerza"
+    ],
+    "immediate_action": "Mantén la puerta entreabierta o cerrada con cadena. Graba la intervención y dile: \"Oficial, con todo respeto, para ingresar a mi domicilio necesito que me muestre una orden judicial escrita. Como no hay flagrancia ni persecución, no autorizo su ingreso\".",
+    "rights_summary": "Tu casa es un espacio inviolable. La policía no puede ingresar a la fuerza ni hacer registros solo por sospechas. Únicamente pueden entrar si un juez lo ha ordenado por escrito o si te están persiguiendo en el acto mismo de un delito (flagrancia).",
+    "legal_basis": "Inciso 9. Derecho a la inviolabilidad del domicilio. Nadie puede ingresar ni efectuar investigaciones o registros sin autorización de la persona que lo habita o sin mandato judicial, salvo flagrante delito o muy grave peligro de su perpetración."
+  },
+  {
+    "id": "secreto_comunicaciones_celular",
+    "title": "Revisión Arbitraria de Celular o Documentos",
+    "intents": [
+      "me quieren revisar el fono",
+      "policia me pide la clave de mi celular"
+    ],
+    "immediate_action": "Guarda el celular y dile con calma: \"Oficial, mis comunicaciones son privadas. No le puedo dar la clave de mi celular ni permitir que lea mis mensajes sin la orden de un juez, tal como manda la Constitución\".",
+    "rights_summary": "Tus chats, fotos, correos y llamadas son estrictamente privados. Ningún policía durante una intervención de rutina o detención puede obligarte a desbloquear tu teléfono. Si lo hacen a la fuerza, es ilegal.",
+    "legal_basis": "Inciso 10. Derecho al secreto y a la inviolabilidad de sus comunicaciones y documentos privados. Las comunicaciones solo pueden ser intervenidas por mandamiento motivado del juez. Los documentos obtenidos violando esto no tienen efecto legal."
+  },
+  {
+    "id": "libertad_transito_calle",
+    "title": "Retención Injustificada en la Vía Pública o Tránsito",
+    "intents": [
+      "me pararon en la calle y no me dejan ir",
+      "tombos me estan reteniendo sin motivo"
+    ],
+    "immediate_action": "Si ya mostraste tu DNI, pregunta firme: \"Oficial, ya le entregué mi identificación. Si no estoy detenido ni existe ninguna orden de captura en mi contra, ¿estoy libre para retirarme en este momento?\".",
+    "rights_summary": "Tienes total libertad para caminar y transitar por el país. La policía puede pedirte tu DNI (control de identidad), pero una vez que validan que no tienes requisitorias, deben dejarte ir de inmediato.",
+    "legal_basis": "Inciso 11. Derecho a transitar por el territorio nacional. Nadie está impedido de circular libremente salvo limitaciones por razones de sanidad o mandato judicial."
+  },
+  {
+    "id": "detencion_arbitraria_comisaria",
+    "title": "Detención Arbitraria sin Orden ni Flagrancia",
+    "intents": [
+      "me estan enmarrocando por las puras",
+      "me quieren llevar a la comisaria sin motivo"
+    ],
+    "immediate_action": "No opongas resistencia física. En voz alta y clara dile: \"Oficial, ¿cuál es el motivo legal exacto de mi detención? No estoy en flagrancia ni me ha mostrado una orden del juez. Exijo mi derecho a no ser detenido arbitrariamente y a llamar a mi abogado\".",
+    "rights_summary": "Nadie te puede meter preso o llevarte 'para investigar' por simple sospecha de la policía. Solo te pueden detener si te atrapan cometiendo el delito o si un juez emitió una orden de captura contra ti.",
+    "legal_basis": "Inciso 24, literal f. Nadie puede ser detenido sino por mandamiento escrito y motivado del juez o por las autoridades policiales en caso de flagrante delito. La detención no durará más de 48 horas."
+  },
+  {
+    "id": "prohibicion_incomunicacion",
+    "title": "Incomunicación y Negación de Defensa",
+    "intents": [
+      "no me dejan llamar a mi abogado",
+      "me han quitado mis cosas y no me dejan hablar con mi familia"
+    ],
+    "immediate_action": "Exige verbalmente a los efectivos en la comisaría: \"Señor oficial, la Constitución prohíbe la incomunicación. Necesito contactar de inmediato a mi abogado y a mi familia para informarles que estoy aquí\".",
+    "rights_summary": "No existe el concepto de que 'te quitan todo y te encierran'. Tienes pleno derecho a que tu familia y tu defensa legal sepan exactamente en qué dependencia policial estás recluido en todo momento.",
+    "legal_basis": "Inciso 24, literal g. Nadie puede ser incomunicado sino en caso indispensable para esclarecer un delito. La autoridad está obligada bajo responsabilidad a señalar sin dilación el lugar donde se halla la persona detenida."
+  },
+  {
+    "id": "proteccion_contra_agresiones",
+    "title": "Agresión Policial o Declaración Forzada",
+    "intents": [
+      "los policias me estan pegando",
+      "me quieren hacer firmar un papel a la fuerza"
+    ],
+    "immediate_action": "No firmes ni digas nada. Si sufres violencia, dile: \"Oficial, me acojo a mi derecho a guardar silencio. Cualquier declaración que me obligue a firmar sin mi abogado o bajo presión física es nula. Exijo pasar por el médico legista\".",
+    "rights_summary": "Está terminantemente prohibido que los agentes te golpeen, amenacen o torturen para que confieses algo. Cualquier papel que firmes bajo miedo, golpes o sin presencia de tu abogado no sirve en un juicio.",
+    "legal_basis": "Inciso 24, literal h. Nadie debe ser víctima de violencia moral, psíquica o física, ni sometido a tortura. Carecen de valor las declaraciones obtenidas por la violencia y quien la emplea incurre en responsabilidad."
+  },
+  {
+    "id": "no_discriminacion_perfilaje",
+    "title": "Intervención por Perfilaje Racial o Discriminación",
+    "intents": [
+      "me pararon por mi cara",
+      "el tombo me discrimina por como estoy vestido"
+    ],
+    "immediate_action": "Mantén la calma y dile: \"Oficial, estoy colaborando con mi DNI, pero le recuerdo que el control de identidad debe tener un motivo justificado y no basarse en mi apariencia, origen o condición, según nuestra Constitución.\"",
+    "rights_summary": "La policía no puede intervenirte de manera constante o arbitraria asumiendo que eres sospechoso únicamente por tu forma de vestir, color de piel, género o nivel económico.",
+    "legal_basis": "Inciso 2. Derecho a la igualdad ante la ley. Nadie debe ser discriminado por motivo de origen, raza, sexo, idioma, religión, opinión, condición económica o de cualquiera otra índole."
+  },
+  {
+    "id": "derecho_reunion_protesta",
+    "title": "Intervención en Protestas o Reuniones Pacíficas",
+    "intents": [
+      "los tombos nos quieren botar de la plaza",
+      "me quieren detener por marchar"
+    ],
+    "immediate_action": "Si la marcha es pacífica y no hay daños, dile en voz alta y grabando: \"Oficial, estamos ejerciendo nuestro derecho constitucional a la reunión pacífica y sin armas. No estamos alterando el orden público ni cometiendo delito.\"",
+    "rights_summary": "Tienes total derecho a manifestarte o reunirte en espacios públicos. La policía solo puede intervenir, dispersar o detener si hay violencia física, uso de armas o un riesgo grave a la sanidad o seguridad pública.",
+    "legal_basis": "Inciso 12. Derecho a reunirse pacíficamente sin armas. Las reuniones en plazas y vías públicas exigen anuncio anticipado, y la autoridad solo puede prohibirlas por motivos probados de seguridad o sanidad públicas."
+  },
+  {
+    "id": "exigencias_ilegales_abuso",
+    "title": "Órdenes Policiales Ilegales o Inventadas",
+    "intents": [
+      "el policia me obliga a hacer algo que no quiero",
+      "me piden cosas que no estan en la ley"
+    ],
+    "immediate_action": "Responde con respeto pero total firmeza: \"Oficial, como ciudadano solo estoy obligado a acatar lo que la ley manda expresamente. No me puede obligar a realizar una acción que no está tipificada en la norma penal o de tránsito.\"",
+    "rights_summary": "Un efectivo no puede inventar reglas en el momento (por ejemplo, exigirte hacer castigos físicos en la vereda, obligarte a borrar un video o pedirte coimas). Si la ley no te obliga a hacerlo, es abuso de autoridad.",
+    "legal_basis": "Inciso 24, literal a. Nadie está obligado a hacer lo que la ley no manda, ni impedido de hacer lo que ella no prohíbe."
+  },
+  {
+    "id": "presuncion_inocencia_trato",
+    "title": "Trato como Culpable en Vía Pública",
+    "intents": [
+      "me estan tratando como choro frente a todos",
+      "me acusan de robo sin tener pruebas"
+    ],
+    "immediate_action": "Dile claramente: \"Oficial, exijo respeto a mis derechos. Usted me está tratando como culpable y exponiéndome en la vía pública, pero la Constitución me garantiza la presunción de inocencia mientras un juez no dicte lo contrario.\"",
+    "rights_summary": "La policía no puede exhibirte como delincuente ante la prensa o los vecinos, ni obligarte a aceptar un delito en la calle mediante gritos o coacciones si no has sido condenado mediante un juicio justo.",
+    "legal_basis": "Inciso 24, literal e. Toda persona es considerada inocente mientras no se haya declarado judicialmente su responsabilidad."
+  }
+]
