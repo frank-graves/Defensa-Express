@@ -41,7 +41,31 @@ class LegalDataService {
     'Á': 'a', 'É': 'e', 'Í': 'i', 'Ó': 'o', 'Ú': 'u', 'Ü': 'u', 'Ñ': 'n',
   };
 
+  // Límite estricto de tamaño de JSON para prevenir DoS/OOM
+  static const int _maxJsonSize = 50 * 1024;
+
   bool _isLoaded = false;
+
+  /// Helper privado: Carga JSON desde assets con validación de tamaño (circuit breaker).
+  /// Previene ataques DoS al limitar el tamaño del archivo antes de decodificarlo.
+  /// 
+  /// Lanza [Exception] si el archivo excede [_maxJsonSize], evitando OutOfMemoryError.
+  Future<String> _loadJsonWithSizeLimit(String assetPath) async {
+    try {
+      final data = await rootBundle.load(assetPath);
+      
+      if (data.lengthInBytes > _maxJsonSize) {
+        throw Exception(
+          'Archivo JSON demasiado grande: ${data.lengthInBytes} bytes excede límite de $_maxJsonSize bytes. '
+          'Posible ataque DoS o corrupción del APK.'
+        );
+      }
+      
+      return utf8.decode(data.buffer.asUint8List());
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   /// Carga todos los archivos JSON desde los assets
   /// Debe ejecutarse una sola vez en el ciclo de vida de la aplicación
@@ -50,7 +74,7 @@ class LegalDataService {
     try {
       // Cargar Derechos Fundamentales
       final String dfResponse =
-          await rootBundle.loadString('assets/legal_data/Derechos fundamentales de la persona.json');
+          await _loadJsonWithSizeLimit('assets/legal_data/Derechos fundamentales de la persona.json');
       final List<dynamic> dfData = jsonDecode(dfResponse);
       _derechosFundamentales = dfData
           .map((item) => DerechoFundamental.fromJson(item as Map<String, dynamic>))
@@ -58,7 +82,7 @@ class LegalDataService {
 
       // Cargar Código Procesal Penal
       final String cppResponse =
-          await rootBundle.loadString('assets/legal_data/Código Procesal Penal.json');
+          await _loadJsonWithSizeLimit('assets/legal_data/Código Procesal Penal.json');
       final List<dynamic> cppData = jsonDecode(cppResponse);
       _codigoProcesal = cppData
           .map((item) => EscenarioProcesal.fromJson(item as Map<String, dynamic>))
@@ -66,7 +90,7 @@ class LegalDataService {
 
       // Cargar Reglamento Nacional de Tránsito
       final String rntResponse =
-          await rootBundle.loadString('assets/legal_data/Reglamento Nacional de Tránsito.json');
+          await _loadJsonWithSizeLimit('assets/legal_data/Reglamento Nacional de Tránsito.json');
       final Map<String, dynamic> rntData = jsonDecode(rntResponse);
       
       if (rntData['glosario'] != null) {
