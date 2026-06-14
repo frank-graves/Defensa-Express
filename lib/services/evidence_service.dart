@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vibration/vibration.dart';
@@ -59,6 +61,142 @@ class _VideoRecordingSession {
 /// - Permisos verificados antes de grabar
 /// - Feedback háptico (vibración)
 /// - Banner legal informativo
+
+// ============================================================================
+// TOP-LEVEL FUNCTIONS FOR ISOLATE EXECUTION (DoD 5220.22-M)
+// ============================================================================
+
+/// Modelo de datos para pasar parámetros al Isolate de borrado seguro
+class _SecureDeleteParams {
+  final String filePath;
+  
+  _SecureDeleteParams(this.filePath);
+}
+
+/// Sobrescribe un archivo con un byte específico (0x00 o 0xFF) - para Isolate
+Future<void> _overwriteFileInChunksIsolate(
+  File file,
+  int byteValue,
+  int bufferSize,
+) async {
+  final fileSize = await file.length();
+  final buffer = List<int>.filled(bufferSize, byteValue);
+  final raf = await file.open(mode: FileMode.write);
+
+  try {
+    int bytesWritten = 0;
+    while (bytesWritten < fileSize) {
+      final remainingBytes = fileSize - bytesWritten;
+      final chunkSize = remainingBytes < bufferSize ? remainingBytes : bufferSize;
+      await raf.writeFrom(buffer, 0, chunkSize);
+      bytesWritten += chunkSize;
+    }
+    await raf.flush();
+  } finally {
+    await raf.close();
+  }
+}
+
+/// Sobrescribe un archivo con bytes aleatorios criptográficos - para Isolate
+Future<void> _overwriteFileWithRandomBytesIsolate(
+  File file,
+  int bufferSize,
+) async {
+  final fileSize = await file.length();
+  final random = Random.secure();
+  final raf = await file.open(mode: FileMode.write);
+
+  try {
+    int bytesWritten = 0;
+    while (bytesWritten < fileSize) {
+      final remainingBytes = fileSize - bytesWritten;
+      final chunkSize = remainingBytes < bufferSize ? remainingBytes : bufferSize;
+      final randomBuffer = List<int>.generate(
+        chunkSize,
+        (_) => random.nextInt(256),
+      );
+      await raf.writeFrom(randomBuffer);
+      bytesWritten += chunkSize;
+    }
+    await raf.flush();
+  } finally {
+    await raf.close();
+  }
+}
+
+/// Genera nombre de archivo aleatorio para ofuscación - para Isolate
+String _generateRandomFileNameIsolate() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  final random = Random.secure();
+  final buffer = StringBuffer();
+  for (int i = 0; i < 12; i++) {
+    buffer.write(chars[random.nextInt(chars.length)]);
+  }
+  return '${buffer.toString()}.tmp';
+}
+
+/// **FUNCIÓN PRINCIPAL DE BORRADO SEGURO - Ejecutada en Isolate**
+/// 
+/// Esta función orquesta todas las 3 pasadas DoD 5220.22-M y se ejecuta
+/// completamente en un Isolate separado del Main Thread.
+/// 
+/// **Parámetros:** Ruta del archivo (String) - serializable
+/// **Retorna:** true si se eliminó exitosamente, false si falló
+/// 
+/// **Ventaja de Isolate:** Las operaciones de I/O pesadas no bloquean la UI
+Future<bool> _performSecureDeleteInIsolate(String filePath) async {
+  try {
+    final file = File(filePath);
+    
+    if (!await file.exists()) {
+      if (kDebugMode) { print('⚠️ Archivo no encontrado: $filePath'); }
+      return false;
+    }
+
+    final fileSize = await file.length();
+    const maxSafeSize = 2 * 1024 * 1024 * 1024; // 2 GB
+    
+    if (fileSize > maxSafeSize) {
+      if (kDebugMode) { print('⚠️ Archivo demasiado grande ($fileSize bytes).'); }
+      return false;
+    }
+
+    const bufferSize = 64 * 1024;
+
+    // Pasada 1: Sobrescribir con ceros
+    if (kDebugMode) { print('🔄 Pasada 1/3: Sobrescribiendo con ceros (0x00)...'); }
+    await _overwriteFileInChunksIsolate(file, 0x00, bufferSize);
+
+    // Pasada 2: Sobrescribir con unos
+    if (kDebugMode) { print('🔄 Pasada 2/3: Sobrescribiendo con unos (0xFF)...'); }
+    await _overwriteFileInChunksIsolate(file, 0xFF, bufferSize);
+
+    // Pasada 3: Sobrescribir con bytes aleatorios
+    if (kDebugMode) { print('🔄 Pasada 3/3: Sobrescribiendo con ruido criptográfico...'); }
+    await _overwriteFileWithRandomBytesIsolate(file, bufferSize);
+
+    // Ofuscación: Renombrar
+    if (kDebugMode) { print('🔄 Ofuscando metadatos: renombrando archivo...'); }
+    final obfuscatedName = _generateRandomFileNameIsolate();
+    final renamedFile = File('${file.parent.path}/$obfuscatedName');
+
+    try {
+      await file.rename(renamedFile.path);
+    } catch (e) {
+      if (kDebugMode) { print('⚠️ Renombrado fallido, continuando: $e'); }
+    }
+
+    // Eliminación final
+    final fileToDelete = await renamedFile.exists() ? renamedFile : file;
+    await fileToDelete.delete();
+
+    if (kDebugMode) { print('✅ Archivo eliminado de forma segura (en Isolate): $filePath'); }
+    return true;
+  } catch (e) {
+    if (kDebugMode) { print('❌ Error eliminando archivo en Isolate: $e'); }
+    return false;
+  }
+}
 
 class EvidenceService {
   static final EvidenceService _instance = EvidenceService._internal();
@@ -587,6 +725,16 @@ class EvidenceService {
         if (kDebugMode) { print('✅ Cámara desechada (recursos liberados)'); }
       }
 
+      // Limpiar caché de imágenes en memoria (DoD 5220.22-M: privacy en RAM)
+      try {
+        final imageCache = PaintingBinding.instance.imageCache;
+        imageCache.clearLiveImages();
+        imageCache.clear();
+        if (kDebugMode) { print('✅ ImageCache limpiado (memoria segura)'); }
+      } catch (e) {
+        if (kDebugMode) { print('⚠️ No se pudo limpiar ImageCache: $e'); }
+      }
+
       // Resetear sessions
       _audioSession.reset();
       _videoSession.reset();
@@ -669,6 +817,10 @@ class EvidenceService {
 
   /// Elimina un archivo de evidencia de forma segura con 3 pasadas DoD 5220.22-M
   /// 
+  /// **REFACTORIZADO CON ISOLATE:** Este método ahora delega la operación
+  /// pesada de I/O a un Isolate separado usando compute(), eliminando
+  /// completamente cualquier bloqueo del Main Thread.
+  /// 
   /// **Estándar:** National Security Agency (NSA)
   /// **Pasadas:**
   /// 1. Sobrescribir con 0x00 (ceros)
@@ -679,126 +831,28 @@ class EvidenceService {
   /// - Max seguro: 2 GB
   /// - Buffer: 64 KB (evita OutOfMemoryError)
   /// - Ofuscación: Renombrado a string aleatorio
+  /// - **Isolate:** Ejecución completamente asíncrona sin bloqueos
   /// 
   /// **Retorna:** true si se eliminó exitosamente
   Future<bool> secureDeleteEvidenceFile(File file) async {
     try {
+      // Validación previa rápida en Main Thread
       if (!await file.exists()) {
         if (kDebugMode) { print('⚠️ Archivo no encontrado: ${file.path}'); }
         return false;
       }
 
-      final fileSize = await file.length();
+      // Delegar TODO el trabajo pesado al Isolate
+      final result = await compute(
+        _performSecureDeleteInIsolate,
+        file.path,  // Parámetro serializable (String)
+      );
 
-      const maxSafeSize = 2 * 1024 * 1024 * 1024; // 2 GB
-      if (fileSize > maxSafeSize) {
-        if (kDebugMode) { print('⚠️ Archivo demasiado grande ($fileSize bytes).'); }
-        return false;
-      }
-
-      const bufferSize = 64 * 1024;
-      final random = Random.secure();
-
-      if (kDebugMode) { print('🔄 Pasada 1/3: Sobrescribiendo con ceros (0x00)...'); }
-      await _overwriteFileInChunks(file, 0x00, bufferSize);
-
-      if (kDebugMode) { print('🔄 Pasada 2/3: Sobrescribiendo con unos (0xFF)...'); }
-      await _overwriteFileInChunks(file, 0xFF, bufferSize);
-
-      if (kDebugMode) { print('🔄 Pasada 3/3: Sobrescribiendo con ruido criptográfico...'); }
-      await _overwriteFileWithRandomBytes(file, bufferSize, random);
-
-      if (kDebugMode) { print('🔄 Ofuscando metadatos: renombrando archivo...'); }
-      final obfuscatedName = _generateRandomFileName();
-      final renamedFile = File('${file.parent.path}/$obfuscatedName');
-
-      try {
-        await file.rename(renamedFile.path);
-      } catch (e) {
-        if (kDebugMode) { print('⚠️ Renombrado fallido, continuando con eliminación directa: $e'); }
-      }
-
-      final fileToDelete = await renamedFile.exists() ? renamedFile : file;
-      await fileToDelete.delete();
-
-      if (kDebugMode) { print('✅ Archivo eliminado de forma segura: ${file.path}'); }
-      return true;
+      return result;
     } catch (e) {
-      if (kDebugMode) { print('❌ Error eliminando archivo: $e'); }
+      if (kDebugMode) { print('❌ Error en secureDeleteEvidenceFile: $e'); }
       return false;
     }
-  }
-
-  /// Sobrescribe un archivo con un byte específico (0x00 o 0xFF)
-  Future<void> _overwriteFileInChunks(
-    File file,
-    int byteValue,
-    int bufferSize,
-  ) async {
-    final fileSize = await file.length();
-    final buffer = List<int>.filled(bufferSize, byteValue);
-    final raf = await file.open(mode: FileMode.write);
-
-    try {
-      int bytesWritten = 0;
-      while (bytesWritten < fileSize) {
-        final remainingBytes = fileSize - bytesWritten;
-        final chunkSize = remainingBytes < bufferSize ? remainingBytes : bufferSize;
-        await raf.writeFrom(buffer, 0, chunkSize);
-        bytesWritten += chunkSize;
-
-        if (bytesWritten % (1024 * 1024) == 0) {
-          final percent = ((bytesWritten / fileSize) * 100).toStringAsFixed(1);
-          if (kDebugMode) { print('  ↳ Progreso: $percent%'); }
-        }
-      }
-      await raf.flush();
-    } finally {
-      await raf.close();
-    }
-  }
-
-  /// Sobrescribe un archivo con bytes aleatorios criptográficos
-  Future<void> _overwriteFileWithRandomBytes(
-    File file,
-    int bufferSize,
-    Random random,
-  ) async {
-    final fileSize = await file.length();
-    final raf = await file.open(mode: FileMode.write);
-
-    try {
-      int bytesWritten = 0;
-      while (bytesWritten < fileSize) {
-        final remainingBytes = fileSize - bytesWritten;
-        final chunkSize = remainingBytes < bufferSize ? remainingBytes : bufferSize;
-        final randomBuffer = List<int>.generate(
-          chunkSize,
-          (_) => random.nextInt(256),
-        );
-        await raf.writeFrom(randomBuffer);
-        bytesWritten += chunkSize;
-
-        if (bytesWritten % (1024 * 1024) == 0) {
-          final percent = ((bytesWritten / fileSize) * 100).toStringAsFixed(1);
-          if (kDebugMode) { print('  ↳ Progreso: $percent%'); }
-        }
-      }
-      await raf.flush();
-    } finally {
-      await raf.close();
-    }
-  }
-
-  /// Genera nombre de archivo aleatorio para ofuscación
-  String _generateRandomFileName() {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    final random = Random.secure();
-    final buffer = StringBuffer();
-    for (int i = 0; i < 12; i++) {
-      buffer.write(chars[random.nextInt(chars.length)]);
-    }
-    return '${buffer.toString()}.tmp';
   }
 
   // ============================================================================

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 import 'services/legal_data_service.dart';
@@ -78,7 +79,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin, 
     try {
       await _legalDataService.cargarDatos();
     } catch (e) {
-      print('❌ Error cargando datos legales: $e');
+      if (kDebugMode) { print('❌ Error cargando datos legales: $e'); }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error cargando base legal: $e')),
@@ -133,7 +134,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin, 
               resultados.add(ResultadoFormateado.fromGlosario(res));
             }
           } catch (e) {
-            print('⚠️ Error procesando resultado: $e');
+            if (kDebugMode) { print('⚠️ Error procesando resultado: $e'); }
           }
         }
 
@@ -145,7 +146,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin, 
           });
         }
       } catch (e) {
-        print('❌ Error en búsqueda: $e');
+        if (kDebugMode) { print('❌ Error en búsqueda: $e'); }
         if (mounted) {
           setState(() {
             _showResults = true;
