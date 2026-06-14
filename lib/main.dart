@@ -4,7 +4,8 @@ import 'dart:async';
 import 'services/legal_data_service.dart';
 import 'services/evidence_service.dart';
 import 'models/legal_models.dart';
-
+import 'models/resultado_formateado.dart';
+import 'utils/plain_language.dart';
 void main() => runApp(const DefensaExpressApp());
 
 class DefensaExpressApp extends StatelessWidget {
@@ -26,191 +27,6 @@ class DefensaExpressApp extends StatelessWidget {
   }
 }
 
-// ============================================================================
-// MODELO PARA TARJETA DE RESULTADO FORMATEADA (Plain Language)
-// ============================================================================
-
-class ResultadoFormateado {
-  final String tipoDocumento; // MTC, CPP, DERECHOS, GLOSARIO, etc.
-  final Color colorAlerta; // Rojo (detención), Amarillo (tránsito), Azul (derechos)
-  final String icono; // Emoji para identificación visual rápida
-  final String titulo; // "¿Qué está pasando?" - GRANDE
-  final String accionInmediata; // "¿Qué hago AHORA?" - Resaltado con "DI ESTO:"
-  final String baseLegal; // Artículo/norma - PEQUEÑO
-  final List<String> detalles; // Viñetas adicionales (máx 10 palabras cada una)
-  final dynamic objetoOriginal; // Para referencia interna
-
-  ResultadoFormateado({
-    required this.tipoDocumento,
-    required this.colorAlerta,
-    required this.icono,
-    required this.titulo,
-    required this.accionInmediata,
-    required this.baseLegal,
-    required this.detalles,
-    required this.objetoOriginal,
-  });
-
-  /// Factory para convertir Infracción a ResultadoFormateado
-  factory ResultadoFormateado.fromInfraccion(Infraccion infraccion) {
-    final esGrave = infraccion.gravedad == GravedadInfraccion.grave ||
-        infraccion.gravedad == GravedadInfraccion.muyGrave;
-    
-    return ResultadoFormateado(
-      tipoDocumento: 'TRÁNSITO',
-      colorAlerta: const Color(0xFFFFB300), // Amarillo para tránsito
-      icono: '🚗',
-      titulo: _traducirDescripcionInfraccion(infraccion.descripcion),
-      accionInmediata: _generarAccionTransito(infraccion),
-      baseLegal: 'RNT D.S. N° 016-2009-MTC | ${infraccion.codigo}',
-      detalles: _generarDetallesInfraccion(infraccion),
-      objetoOriginal: infraccion,
-    );
-  }
-
-  /// Factory para convertir DerechoFundamental a ResultadoFormateado
-  factory ResultadoFormateado.fromDerechoFundamental(DerechoFundamental derecho) {
-    return ResultadoFormateado(
-      tipoDocumento: 'DERECHOS',
-      colorAlerta: const Color(0xFF2196F3), // Azul para derechos
-      icono: '⚖️',
-      titulo: derecho.title.toUpperCase(),
-      accionInmediata: _formatearAccionInmediata(derecho.immediateAction),
-      baseLegal: derecho.legalBasis,
-      detalles: _generarVinetasDeDerechos(derecho.rightsSummary),
-      objetoOriginal: derecho,
-    );
-  }
-
-  /// Factory para convertir EscenarioProcesal a ResultadoFormateado
-  factory ResultadoFormateado.fromEscenarioProcesal(EscenarioProcesal escenario) {
-    final esDetenccion = escenario.scenario.toLowerCase().contains('detenc') ||
-        escenario.scenario.toLowerCase().contains('arrest');
-    
-    return ResultadoFormateado(
-      tipoDocumento: 'PROCEDIMIENTO',
-      colorAlerta: esDetenccion 
-          ? const Color(0xFFEF5350) // Rojo para detenciones
-          : const Color(0xFFC8A84B), // Dorado para otros
-      icono: esDetenccion ? '🚨' : '📋',
-      titulo: escenario.scenario.toUpperCase(),
-      accionInmediata: _formatearGuionDefensa(escenario.guionDeDefensa),
-      baseLegal: 'Código Procesal Penal | ${escenario.accionLegal}',
-      detalles: [
-        '⚠️ LÍMITE POLICIAL: ${escenario.limitePolicial}',
-        ...escenario.tags?.map((t) => '• $t').toList() ?? [],
-      ],
-      objetoOriginal: escenario,
-    );
-  }
-
-  /// Factory para convertir GlosarioTermino a ResultadoFormateado
-  factory ResultadoFormateado.fromGlosario(GlosarioTermino termino) {
-    return ResultadoFormateado(
-      tipoDocumento: 'DEFINICIÓN',
-      colorAlerta: const Color(0xFF9C27B0), // Púrpura para glosario
-      icono: '📖',
-      titulo: termino.termino.toUpperCase(),
-      accionInmediata: termino.definicion,
-      baseLegal: 'Glosario Legal',
-      detalles: [],
-      objetoOriginal: termino,
-    );
-  }
-
-  /// Factory para convertir PilarFundamental a ResultadoFormateado
-  factory ResultadoFormateado.fromPilarFundamental(PilarFundamental pilar) {
-    return ResultadoFormateado(
-      tipoDocumento: 'PRINCIPIO',
-      colorAlerta: const Color(0xFF4CAF50), // Verde para principios
-      icono: '⭐',
-      titulo: pilar.concepto.toUpperCase(),
-      accionInmediata: pilar.descripcion,
-      baseLegal: 'Res. Min. N° 952-2018-IN',
-      detalles: [],
-      objetoOriginal: pilar,
-    );
-  }
-}
-
-// ============================================================================
-// FUNCIONES AUXILIARES DE TRADUCCIÓN A PLAIN LANGUAGE
-// ============================================================================
-
-/// Traduce descripciones de infracciones a lenguaje simple
-String _traducirDescripcionInfraccion(String descripcion) {
-  final map = {
-    'estacionar': 'PARQUEASTE MAL',
-    'velocidad': 'IBAS MÁS RÁPIDO DE LO PERMITIDO',
-    'licencia': 'ERES CONDUCTOR SIN CARNET',
-    'sobrepasar': 'CRUZASTE LA LÍNEA BLANCA',
-    'semáforo': 'PASASTE LA LUZ ROJA',
-    'cinturón': 'NO LLEVABAS CINTURÓN DE SEGURIDAD',
-    'teléfono': 'USABAS CELULAR MIENTRAS MANEJABAS',
-  };
-
-  for (var key in map.keys) {
-    if (descripcion.toLowerCase().contains(key)) {
-      return map[key]!;
-    }
-  }
-
-  return descripcion.substring(0, 60).toUpperCase();
-}
-
-/// Genera acción inmediata para una infracción
-String _generarAccionTransito(Infraccion infraccion) {
-  if (infraccion.gravedad == GravedadInfraccion.grave) {
-    return '🚗 DI ESTO: "Entiendo. Quiero ver la multa en el sistema. Tomaré foto de mi documento."';
-  }
-  return '🚗 DI ESTO: "¿Cuál es la razón del control? Estoy disponible."';
-}
-
-/// Genera viñetas de detalles para infracción
-List<String> _generarDetallesInfraccion(Infraccion infraccion) {
-  return [
-    '💰 Multa: ${infraccion.sancionMonto}',
-    if (infraccion.puntos > 0) '⚠️ Puntos de infracción: ${infraccion.puntos}',
-    if (infraccion.medidaPreventiva.isNotEmpty)
-      '🔒 Medida: ${infraccion.medidaPreventiva}',
-    '🔴 Gravedad: ${infraccion.gravedad.valor}',
-  ];
-}
-
-/// Formatea acción inmediata de derechos
-String _formatearAccionInmediata(String accion) {
-  if (accion.isEmpty) return 'DI ESTO: "Conozco mis derechos."';
-  
-  if (!accion.toLowerCase().contains('di esto')) {
-    return '💬 DI ESTO: "$accion"';
-  }
-  return accion;
-}
-
-/// Convierte rights_summary en vinetas cortas
-List<String> _generarVinetasDeDerechos(String summary) {
-  if (summary.isEmpty) return [];
-  
-  return summary
-      .split('.')
-      .where((s) => s.trim().isNotEmpty)
-      .take(4) // Maximo 4 vinetas
-      .map((s) => '• ${s.trim().substring(0, (s.length < 60 ? s.length : 60))}')
-      .toList();
-}
-
-/// Formatea guión de defensa como "DI ESTO:"
-String _formatearGuionDefensa(String guion) {
-  if (guion.isEmpty) return 'DI ESTO: "Solicito hablar con mi abogado."';
-  
-  final partes = guion.split('|');
-  if (partes.isNotEmpty) {
-    return '💬 DI ESTO: "${partes.first.trim()}"';
-  }
-  
-  return '💬 DI ESTO: "$guion"';
-}
-
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
@@ -218,10 +34,11 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
+class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin, WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   final LegalDataService _legalDataService = LegalDataService();
   final EvidenceService _evidenceService = EvidenceService();
+  Timer? _debounce;
   
   List<ResultadoFormateado> _searchResults = [];
   bool _showResults = false;
@@ -242,6 +59,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _requestPermissions();
     _initializeLegalData();
     
@@ -273,11 +91,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     await Future.wait([
       Permission.microphone.request(),
       Permission.camera.request(),
-      Permission.storage.request(),
     ]);
   }
 
   /// BÚSQUEDA MEJORADA CON RESULTADOS FORMATEADOS
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      _search(query);
+    });
+  }
+
   void _search(String query) {
     if (query.isEmpty) {
       setState(() => _showResults = false);
@@ -440,7 +264,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               // BARRA DE BÚSQUEDA
               TextField(
                 controller: _searchController,
-                onChanged: _search,
+                onChanged: _onSearchChanged,
                 decoration: InputDecoration(
                   hintText: 'Busca rápido: policía, derechos, tránsito...',
                   hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
@@ -846,7 +670,20 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      if (_isRecording) {
+        setState(() => _isRecording = false);
+      }
+      _evidenceService.dispose();
+    }
+  }
+
+  @override
   void dispose() {
+    _debounce?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _evidenceService.dispose();
     _searchController.dispose();
     _recordingAnimController.dispose();
     super.dispose();

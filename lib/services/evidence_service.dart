@@ -113,20 +113,19 @@ class EvidenceService {
       final statuses = await [
         Permission.microphone,
         Permission.camera,
-        Permission.storage,
       ].request();
 
       final allGranted = statuses.values.every((status) => status.isGranted);
 
       if (!allGranted) {
-        print('❌ Permisos denegados: ${statuses.toString()}');
+        if (kDebugMode) { print('❌ Permisos denegados: ${statuses.toString()}'); }
         return false;
       }
 
-      print('✅ Todos los permisos concedidos');
+      if (kDebugMode) { print('✅ Todos los permisos concedidos'); }
       return true;
     } catch (e) {
-      print('❌ Error solicitando permisos: $e');
+      if (kDebugMode) { print('❌ Error solicitando permisos: $e'); }
       return false;
     }
   }
@@ -213,11 +212,11 @@ class EvidenceService {
       // Feedback háptico (sin mirar pantalla)
       await _hapticFeedback(duration: 100);
 
-      print('✅ Grabación de audio iniciada: $audioPath');
+      if (kDebugMode) { print('✅ Grabación de audio iniciada: $audioPath'); }
       return true;
     } catch (e) {
       onError?.call('Error iniciando grabación de audio: $e');
-      print('❌ Error iniciando audio: $e');
+      if (kDebugMode) { print('❌ Error iniciando audio: $e'); }
       return false;
     }
   }
@@ -233,7 +232,7 @@ class EvidenceService {
       final path = await _audioRecorder.stop();
       
       final duration = _audioSession.duration;
-      print('✅ Grabación de audio finalizada: $path (${duration.inSeconds}s)');
+      if (kDebugMode) { print('✅ Grabación de audio finalizada: $path (${duration.inSeconds}s)'); }
 
       // Feedback háptico
       await _hapticFeedback(duration: 150);
@@ -244,7 +243,7 @@ class EvidenceService {
 
       return result;
     } catch (e) {
-      print('❌ Error deteniendo audio: $e');
+      if (kDebugMode) { print('❌ Error deteniendo audio: $e'); }
       return null;
     }
   }
@@ -270,7 +269,7 @@ class EvidenceService {
       final cameras = await availableCameras();
       
       if (cameras.isEmpty) {
-        print('❌ No hay cámaras disponibles en el dispositivo');
+        if (kDebugMode) { print('❌ No hay cámaras disponibles en el dispositivo'); }
         return null;
       }
 
@@ -282,7 +281,7 @@ class EvidenceService {
 
       return backCamera;
     } catch (e) {
-      print('❌ Error obteniendo cámaras: $e');
+      if (kDebugMode) { print('❌ Error obteniendo cámaras: $e'); }
       return null;
     }
   }
@@ -367,12 +366,12 @@ class EvidenceService {
       await Future.delayed(const Duration(milliseconds: 150));
       await _hapticFeedback(duration: 100);
 
-      print('✅ Grabación de video iniciada (Modo Discreto): $videoPath');
+      if (kDebugMode) { print('✅ Grabación de video iniciada (Modo Discreto): $videoPath'); }
       return true;
     } catch (e) {
       _cameraInitializing = false;
       onError?.call('Error iniciando grabación de video: $e');
-      print('❌ Error iniciando video: $e');
+      if (kDebugMode) { print('❌ Error iniciando video: $e'); }
       return false;
     }
   }
@@ -390,7 +389,7 @@ class EvidenceService {
       }
 
       if (_cameraController == null || !_cameraController!.value.isRecordingVideo) {
-        print('⚠️ Cámara no está grabando');
+        if (kDebugMode) { print('⚠️ Cámara no está grabando'); }
         return null;
       }
 
@@ -398,7 +397,7 @@ class EvidenceService {
       final videoFile = await _cameraController!.stopVideoRecording();
 
       final duration = _videoSession.duration;
-      print('✅ Grabación de video finalizada: ${videoFile.path} (${duration.inSeconds}s)');
+      if (kDebugMode) { print('✅ Grabación de video finalizada: ${videoFile.path} (${duration.inSeconds}s)'); }
 
       // Guardar ruta final en carpeta privada (si no está ya ahí)
       final evidenceDir = await _getEvidenceDirectory();
@@ -406,7 +405,7 @@ class EvidenceService {
       
       // Mover archivo a carpeta privada si es necesario
       final savedFile = await videoFile.saveTo(finalPath);
-      print('✅ Video guardado en: $finalPath');
+      if (kDebugMode) { print('✅ Video guardado en: $finalPath'); }
 
       // Feedback háptico
       await _hapticFeedback(duration: 150);
@@ -416,19 +415,20 @@ class EvidenceService {
       _cameraController = null;
 
       // Guardar ruta antes de limpiar estado
+      _videoSession.filePath = finalPath;
       final result = _videoSession.filePath;
       _videoSession.reset();  // Limpiar estado
 
       return result;
     } catch (e) {
-      print('❌ Error deteniendo video: $e');
+      if (kDebugMode) { print('❌ Error deteniendo video: $e'); }
       
       // LIMPIEZA FORZADA en caso de error
       try {
         await _cameraController?.dispose();
         _cameraController = null;
       } catch (disposeError) {
-        print('⚠️ Error en cleanup de cámara: $disposeError');
+        if (kDebugMode) { print('⚠️ Error en cleanup de cámara: $disposeError'); }
       }
       
       _videoSession.reset();
@@ -459,15 +459,15 @@ class EvidenceService {
       // Iniciar video (puede fallar, pero audio sigue funcionando)
       final videoStarted = await startDiscreteVideoRecording(onError: onError);
       if (!videoStarted) {
-        print('⚠️ Video falló, continuando con audio solamente');
+        if (kDebugMode) { print('⚠️ Video falló, continuando con audio solamente'); }
         // No retornar false, ya tenemos audio
       }
 
-      print('✅ Grabación completa (Audio + Video) iniciada');
+      if (kDebugMode) { print('✅ Grabación completa (Audio + Video) iniciada'); }
       return true;
     } catch (e) {
       onError?.call('Error iniciando grabación completa: $e');
-      print('❌ Error: $e');
+      if (kDebugMode) { print('❌ Error: $e'); }
       return false;
     }
   }
@@ -488,10 +488,10 @@ class EvidenceService {
         'video': await stopDiscreteVideoRecording(),
       };
 
-      print('✅ Todas las grabaciones detenidas');
+      if (kDebugMode) { print('✅ Todas las grabaciones detenidas'); }
       return results;
     } catch (e) {
-      print('❌ Error deteniendo grabaciones: $e');
+      if (kDebugMode) { print('❌ Error deteniendo grabaciones: $e'); }
       return {'audio': null, 'video': null};
     }
   }
@@ -504,16 +504,17 @@ class EvidenceService {
   Future<List<File>> listEvidenceFiles() async {
     try {
       final evidenceDir = await _getEvidenceDirectory();
-      final files = evidenceDir
-          .listSync()
-          .whereType<File>()
+      final files = await evidenceDir
+          .list()
+          .where((e) => e is File)
+          .cast<File>()
           .where(
               (f) => f.path.endsWith('.m4a') || f.path.endsWith('.mp4'))
           .toList();
 
       return files;
     } catch (e) {
-      print('❌ Error listando archivos: $e');
+      if (kDebugMode) { print('❌ Error listando archivos: $e'); }
       return [];
     }
   }
@@ -541,7 +542,7 @@ class EvidenceService {
         'created': stat.modified,
       };
     } catch (e) {
-      print('❌ Error obteniendo info del archivo: $e');
+      if (kDebugMode) { print('❌ Error obteniendo info del archivo: $e'); }
       return {};
     }
   }
@@ -568,7 +569,7 @@ class EvidenceService {
   /// Sin limpieza, el hardware queda bloqueado y drena batería
   Future<void> dispose() async {
     try {
-      print('🧹 Limpiando recursos de EvidenceService...');
+      if (kDebugMode) { print('🧹 Limpiando recursos de EvidenceService...'); }
 
       // Detener grabaciones si están activas
       if (isRecordingAudio) {
@@ -583,16 +584,16 @@ class EvidenceService {
       if (_cameraController != null) {
         await _cameraController!.dispose();
         _cameraController = null;
-        print('✅ Cámara desechada (recursos liberados)');
+        if (kDebugMode) { print('✅ Cámara desechada (recursos liberados)'); }
       }
 
       // Resetear sessions
       _audioSession.reset();
       _videoSession.reset();
 
-      print('✅ Cleanup completado');
+      if (kDebugMode) { print('✅ Cleanup completado'); }
     } catch (e) {
-      print('⚠️ Error en cleanup: $e');
+      if (kDebugMode) { print('⚠️ Error en cleanup: $e'); }
     }
   }
 
@@ -648,7 +649,7 @@ class EvidenceService {
         Vibration.vibrate(duration: duration);
       }
     } catch (e) {
-      print('⚠️ Vibración no disponible: $e');
+      if (kDebugMode) { print('⚠️ Vibración no disponible: $e'); }
     }
   }
 
@@ -683,7 +684,7 @@ class EvidenceService {
   Future<bool> secureDeleteEvidenceFile(File file) async {
     try {
       if (!await file.exists()) {
-        print('⚠️ Archivo no encontrado: ${file.path}');
+        if (kDebugMode) { print('⚠️ Archivo no encontrado: ${file.path}'); }
         return false;
       }
 
@@ -691,39 +692,39 @@ class EvidenceService {
 
       const maxSafeSize = 2 * 1024 * 1024 * 1024; // 2 GB
       if (fileSize > maxSafeSize) {
-        print('⚠️ Archivo demasiado grande ($fileSize bytes).');
+        if (kDebugMode) { print('⚠️ Archivo demasiado grande ($fileSize bytes).'); }
         return false;
       }
 
       const bufferSize = 64 * 1024;
       final random = Random.secure();
 
-      print('🔄 Pasada 1/3: Sobrescribiendo con ceros (0x00)...');
+      if (kDebugMode) { print('🔄 Pasada 1/3: Sobrescribiendo con ceros (0x00)...'); }
       await _overwriteFileInChunks(file, 0x00, bufferSize);
 
-      print('🔄 Pasada 2/3: Sobrescribiendo con unos (0xFF)...');
+      if (kDebugMode) { print('🔄 Pasada 2/3: Sobrescribiendo con unos (0xFF)...'); }
       await _overwriteFileInChunks(file, 0xFF, bufferSize);
 
-      print('🔄 Pasada 3/3: Sobrescribiendo con ruido criptográfico...');
+      if (kDebugMode) { print('🔄 Pasada 3/3: Sobrescribiendo con ruido criptográfico...'); }
       await _overwriteFileWithRandomBytes(file, bufferSize, random);
 
-      print('🔄 Ofuscando metadatos: renombrando archivo...');
+      if (kDebugMode) { print('🔄 Ofuscando metadatos: renombrando archivo...'); }
       final obfuscatedName = _generateRandomFileName();
       final renamedFile = File('${file.parent.path}/$obfuscatedName');
 
       try {
         await file.rename(renamedFile.path);
       } catch (e) {
-        print('⚠️ Renombrado fallido, continuando con eliminación directa: $e');
+        if (kDebugMode) { print('⚠️ Renombrado fallido, continuando con eliminación directa: $e'); }
       }
 
       final fileToDelete = await renamedFile.exists() ? renamedFile : file;
       await fileToDelete.delete();
 
-      print('✅ Archivo eliminado de forma segura: ${file.path}');
+      if (kDebugMode) { print('✅ Archivo eliminado de forma segura: ${file.path}'); }
       return true;
     } catch (e) {
-      print('❌ Error eliminando archivo: $e');
+      if (kDebugMode) { print('❌ Error eliminando archivo: $e'); }
       return false;
     }
   }
@@ -736,24 +737,24 @@ class EvidenceService {
   ) async {
     final fileSize = await file.length();
     final buffer = List<int>.filled(bufferSize, byteValue);
-    final raf = file.openSync(mode: FileMode.write);
+    final raf = await file.open(mode: FileMode.write);
 
     try {
       int bytesWritten = 0;
       while (bytesWritten < fileSize) {
         final remainingBytes = fileSize - bytesWritten;
         final chunkSize = remainingBytes < bufferSize ? remainingBytes : bufferSize;
-        raf.writeFromSync(buffer, 0, chunkSize);
+        await raf.writeFrom(buffer, 0, chunkSize);
         bytesWritten += chunkSize;
 
         if (bytesWritten % (1024 * 1024) == 0) {
           final percent = ((bytesWritten / fileSize) * 100).toStringAsFixed(1);
-          print('  ↳ Progreso: $percent%');
+          if (kDebugMode) { print('  ↳ Progreso: $percent%'); }
         }
       }
-      raf.flushSync();
+      await raf.flush();
     } finally {
-      raf.closeSync();
+      await raf.close();
     }
   }
 
@@ -764,7 +765,7 @@ class EvidenceService {
     Random random,
   ) async {
     final fileSize = await file.length();
-    final raf = file.openSync(mode: FileMode.write);
+    final raf = await file.open(mode: FileMode.write);
 
     try {
       int bytesWritten = 0;
@@ -775,17 +776,17 @@ class EvidenceService {
           chunkSize,
           (_) => random.nextInt(256),
         );
-        raf.writeFromSync(randomBuffer);
+        await raf.writeFrom(randomBuffer);
         bytesWritten += chunkSize;
 
         if (bytesWritten % (1024 * 1024) == 0) {
           final percent = ((bytesWritten / fileSize) * 100).toStringAsFixed(1);
-          print('  ↳ Progreso: $percent%');
+          if (kDebugMode) { print('  ↳ Progreso: $percent%'); }
         }
       }
-      raf.flushSync();
+      await raf.flush();
     } finally {
-      raf.closeSync();
+      await raf.close();
     }
   }
 
@@ -808,7 +809,7 @@ class EvidenceService {
   /// Guard: `kDebugMode` previene ejecución en RELEASE
   Future<void> clearAllEvidenceFiles() async {
     if (!kDebugMode) {
-      print('⛔ clearAllEvidenceFiles() bloqueado en modo RELEASE');
+      if (kDebugMode) { print('⛔ clearAllEvidenceFiles() bloqueado en modo RELEASE'); }
       return;
     }
 
@@ -822,9 +823,9 @@ class EvidenceService {
         }
       }
 
-      print('✅ Carpeta de evidencia limpiada (DEBUG)');
+      if (kDebugMode) { print('✅ Carpeta de evidencia limpiada (DEBUG)'); }
     } catch (e) {
-      print('❌ Error limpiando carpeta: $e');
+      if (kDebugMode) { print('❌ Error limpiando carpeta: $e'); }
     }
   }
 }
