@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:cryptography/cryptography.dart';
+import 'package:pointycastle/export.dart' as pc;
 
 /// Servicio de Criptografía para Evidencias - Privacy-First
 /// 
@@ -119,16 +120,26 @@ class SecureStorageService {
           // Escribir IV al inicio del archivo
           await raf.writeFrom(iv.bytes);
 
+          // Inicializar stream cipher persistente con estado de contador
+          final streamCipher = pc.SICStreamCipher(pc.AESEngine());
+          streamCipher.init(
+            true, // true para encriptación
+            pc.ParametersWithIV(
+              pc.KeyParameter(masterKeyBytes),
+              Uint8List.fromList(iv.bytes),
+            ),
+          );
+
           // Procesar archivo original por chunks
           final sourceStream = sourceFile.openRead();
           int bytesProcessed = 0;
 
           await for (final chunk in sourceStream) {
-            // Cifrar chunk actual
-            final encrypted = encrypter.encryptBytes(chunk, iv: iv);
+            // Procesar chunk con cipher stateful (mantiene contador del bloque)
+            final encryptedChunk = streamCipher.process(Uint8List.fromList(chunk));
 
             // Escribir ciphertext al archivo destino
-            await raf.writeFrom(encrypted.bytes);
+            await raf.writeFrom(encryptedChunk);
 
             bytesProcessed += chunk.length;
             if (kDebugMode && bytesProcessed % (1024 * 1024) == 0) {
@@ -236,17 +247,26 @@ class SecureStorageService {
         final raf = await decryptedFile.open(mode: FileMode.write);
 
         try {
+          // Inicializar stream cipher persistente con estado de contador
+          final streamCipher = pc.SICStreamCipher(pc.AESEngine());
+          streamCipher.init(
+            false, // false para desencriptación
+            pc.ParametersWithIV(
+              pc.KeyParameter(masterKeyBytes),
+              Uint8List.fromList(iv.bytes),
+            ),
+          );
+
           // Procesar archivo cifrado por chunks, saltando los primeros 16 bytes (IV)
           final sourceStream = encryptedFile.openRead(_ivLength);
           int bytesProcessed = 0;
 
           await for (final chunk in sourceStream) {
-            // Desciframiento de chunk
-            final encrypted = encrypt.Encrypted(chunk);
-            final decrypted = encrypter.decryptBytes(encrypted, iv: iv);
+            // Procesar chunk con cipher stateful (mantiene contador del bloque)
+            final decryptedChunk = streamCipher.process(Uint8List.fromList(chunk));
 
             // Escribir plaintext al archivo destino
-            await raf.writeFrom(decrypted);
+            await raf.writeFrom(decryptedChunk);
 
             bytesProcessed += chunk.length;
             if (kDebugMode && bytesProcessed % (1024 * 1024) == 0) {
