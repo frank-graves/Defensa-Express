@@ -39,4 +39,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/legal_data/
-    - assets/dataset/
